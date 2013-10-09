@@ -1,0 +1,7 @@
+[
+{
+	"id": "line-profiler",
+	"caption": "Run line_profiler",
+	"command": "line_profiler"
+}
+]

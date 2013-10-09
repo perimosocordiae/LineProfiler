@@ -1,0 +1,5 @@
+[
+    {
+        "keys": ["ctrl+alt+shift+p"], "command": "line_profiler"
+    }
+]

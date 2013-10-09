@@ -1,0 +1,50 @@
+[
+	{
+		"id": "tools",
+		"children":
+		[
+		{
+			"caption": "Packages",
+			"id": "packages",
+			"children":
+			[
+			{
+				"caption": "Run line_profiler",
+				"command": "line_profiler"
+			}
+			]
+		}
+		]
+	},
+    {
+        "id": "preferences",
+        "children":
+        [
+            {
+                "caption": "Package Settings",
+                "mnemonic": "P",
+                "id": "package-settings",
+                "children":
+                [
+                    {
+                        "caption": "LineProfiler",
+                        "children":
+                        [
+                            {
+                                "command": "open_file",
+                                "args": {"file": "${packages}/LineProfiler/LineProfiler.sublime-settings"},
+                                "caption": "Settings - Default"
+                            },
+                            { "caption": "-" },
+                            {
+                                "command": "open_file",
+                                "args": {"file": "${packages}/User/LineProfiler.sublime-settings"},
+                                "caption": "Settings – User"
+                            },
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]
