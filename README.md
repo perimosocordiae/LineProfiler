@@ -16,10 +16,13 @@ inside Sublime Text 3.
 ## Usage
 
 Add the `@profile` annotation to any functions you'd like to profile.
-Then, run the `line_profile` command (via keybinding/right-click/menubar).
+Then, run the plugin via the available bindings:
+ * `ctrl-alt-shift-p`
+ * right-click > Run line_profiler
+ * Tools > Packages > Run line_profiler.
 
 If successful, a scratch buffer will appear with your results.
-If not, check the console to see any error messages.
+If not, check the console (``ctrl-` ``)to see any error messages.
 
 The profiler runs in a background process,
 so Sublime will continue operating normally until a result is returned.
