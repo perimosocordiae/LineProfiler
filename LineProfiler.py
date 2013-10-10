@@ -6,16 +6,25 @@ import tempfile
 import time
 import threading
 
-# Load settings on plugin load
-s = sublime.load_settings('LineProfiler.sublime-settings')
-PYTHON = s.get('python','/usr/bin/python')
-KERNPROF = s.get('kernprof','kernprof.py')
-PYTHONPATH = s.get('pythonpath','')
-POLL_SLEEP_SECONDS = s.get('poll_sleep_seconds',1)
-POLL_TIMEOUT_SECONDS = s.get('poll_timeout_seconds',60)
+SETTINGS = None
+
+def plugin_loaded():
+  global SETTINGS
+  SETTINGS = sublime.load_settings('LineProfiler.sublime-settings')
+  if SETTINGS and SETTINGS.get('python') is not None:
+    print('Loaded settings for LineProfiler')
+  else:
+    print('Error loading settings for LineProfiler')
+
+
+if (sys.version_info[0] == 2):
+  sublime.set_timeout(plugin_loaded, 0)
 
 
 class LineProfilerCommand(sublime_plugin.TextCommand):
+  def is_visible(self):
+    return self.is_enabled()
+
   def is_enabled(self):
     return 'source.python' in self.view.scope_name(0)
 
@@ -27,12 +36,13 @@ class LineProfilerCommand(sublime_plugin.TextCommand):
     fname = self.view.file_name()
     is_tmpfile = False
     env = os.environ.copy()
+    pythonpath = SETTINGS.get('pythonpath','')
     if fname is None:
-      env['PYTHONPATH'] = PYTHONPATH
+      env['PYTHONPATH'] = pythonpath
       cwd = None
     else:
       cwd = os.path.dirname(fname)
-      env['PYTHONPATH'] = cwd + os.pathsep + PYTHONPATH
+      env['PYTHONPATH'] = cwd + os.pathsep + pythonpath
 
     # write the file if it's not saved right now
     if fname is None or self.view.is_dirty():
@@ -43,7 +53,9 @@ class LineProfilerCommand(sublime_plugin.TextCommand):
       is_tmpfile = True
 
     # run kernprof with the correct paths
-    p = subprocess.Popen([PYTHON, KERNPROF,'-lbv','-o','/dev/null',fname],
+    python = SETTINGS.get('python','python')
+    kernprof = SETTINGS.get('kernprof','kernprof.py')
+    p = subprocess.Popen([python,kernprof,'-lbv','-o','/dev/null',fname],
         env=env, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     # set up the output catcher thread
@@ -63,14 +75,16 @@ class LineProfilerOutputCommand(sublime_plugin.TextCommand):
 
 
 def read_output(window, p, fname):
+  poll_timeout = SETTINGS.get('poll_timeout_seconds', 60)
+  poll_sleep = SETTINGS.get('poll_sleep_seconds', 1)
   # poll for results
   tic = time.time()
   while p.poll() is None:
-    if time.time() - tic > POLL_TIMEOUT_SECONDS:
+    if time.time() - tic > poll_timeout:
       print('kernprof timed out, killing process')
       p.kill()
       return
-    time.sleep(POLL_SLEEP_SECONDS)
+    time.sleep(poll_sleep)
 
   # read stdout and stderr
   stdout, stderr = p.communicate()
@@ -87,7 +101,7 @@ def read_output(window, p, fname):
     print(errors)
     return
 
-  # parse result
+  # parse result (TODO: handle multiple profiled functions)
   file_name, func_name, profile = '<file>', '<func>', ''
   for i,line in enumerate(output):
     if line.startswith('File:'):
@@ -95,7 +109,8 @@ def read_output(window, p, fname):
     elif line.startswith('Function:'):
       func_name = line.split()[1]
     elif line.startswith('====='):
-      profile = '\n'.join(x.rstrip() for x in output[i-3:])  # include header and total time
+      # include header and total time
+      profile = '\n'.join(x.rstrip() for x in output[i-3:])
       break
 
   # display
