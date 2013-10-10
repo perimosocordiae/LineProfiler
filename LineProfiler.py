@@ -8,11 +8,11 @@ import threading
 
 # Load settings on plugin load
 s = sublime.load_settings('LineProfiler.sublime-settings')
-PYTHON = s.get('python')
-KERNPROF = s.get('kernprof')
-PYTHONPATH = s.get('pythonpath')
-POLL_SLEEP_SECONDS = s.get('poll_sleep_seconds')
-POLL_TIMEOUT_SECONDS = s.get('poll_timeout_seconds')
+PYTHON = s.get('python','/usr/bin/python')
+KERNPROF = s.get('kernprof','kernprof.py')
+PYTHONPATH = s.get('pythonpath','')
+POLL_SLEEP_SECONDS = s.get('poll_sleep_seconds',1)
+POLL_TIMEOUT_SECONDS = s.get('poll_timeout_seconds',60)
 
 
 class LineProfilerCommand(sublime_plugin.TextCommand):
@@ -29,19 +29,22 @@ class LineProfilerCommand(sublime_plugin.TextCommand):
     env = os.environ.copy()
     if fname is None:
       env['PYTHONPATH'] = PYTHONPATH
+      cwd = None
     else:
-      env['PYTHONPATH'] = os.path.dirname(fname) + os.pathsep + PYTHONPATH
+      cwd = os.path.dirname(fname)
+      env['PYTHONPATH'] = cwd + os.pathsep + PYTHONPATH
 
     # write the file if it's not saved right now
     if fname is None or self.view.is_dirty():
       contents = self.view.substr(sublime.Region(0, self.view.size()))
       with tempfile.NamedTemporaryFile(suffix='.py', delete=False) as fh:
-        fh.write(bytes(contents, 'UTF-8'))
+        fh.write(contents.encode('UTF-8'))
         fname = fh.name
       is_tmpfile = True
 
     # run kernprof with the correct paths
-    p = subprocess.Popen([PYTHON, KERNPROF,'-lbv','-o','/dev/null',fname], env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    p = subprocess.Popen([PYTHON, KERNPROF,'-lbv','-o','/dev/null',fname],
+        env=env, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     # set up the output catcher thread
     window = self.view.window()
@@ -96,7 +99,10 @@ def read_output(window, p, fname):
       break
 
   # display
-  scratch = window.new_file()
+  sublime.set_timeout(lambda: display_results(file_name, func_name, profile), 0)
+
+def display_results(file_name, func_name, profile):
+  scratch = sublime.active_window().new_file()
   scratch.set_scratch(True)
   scratch.set_name('Profile of %s::%s' % (file_name, func_name))
   scratch.run_command('line_profiler_output', {'profile_data': profile})
