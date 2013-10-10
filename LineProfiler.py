@@ -2,11 +2,13 @@ import os
 import sublime
 import sublime_plugin
 import subprocess
+import sys
 import tempfile
 import time
 import threading
 
 SETTINGS = None
+
 
 def plugin_loaded():
   global SETTINGS
@@ -15,7 +17,6 @@ def plugin_loaded():
     print('Loaded settings for LineProfiler')
   else:
     print('Error loading settings for LineProfiler')
-
 
 if (sys.version_info[0] == 2):
   sublime.set_timeout(plugin_loaded, 0)
@@ -101,7 +102,9 @@ def read_output(window, p, fname):
     print(errors)
     return
 
-  # parse result (TODO: handle multiple profiled functions)
+  # parse result
+  #  - TODO: handle multiple profiled functions
+  #  - TODO: highlight slow lines
   file_name, func_name, profile = '<file>', '<func>', ''
   for i,line in enumerate(output):
     if line.startswith('File:'):
@@ -115,6 +118,7 @@ def read_output(window, p, fname):
 
   # display
   sublime.set_timeout(lambda: display_results(file_name, func_name, profile), 0)
+
 
 def display_results(file_name, func_name, profile):
   scratch = sublime.active_window().new_file()
