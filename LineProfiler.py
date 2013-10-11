@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import sublime
 import sublime_plugin
@@ -6,6 +7,8 @@ import sys
 import tempfile
 import time
 import threading
+
+from .profiler_result import parse_output
 
 SETTINGS = None
 
@@ -67,11 +70,18 @@ class LineProfilerCommand(sublime_plugin.TextCommand):
 
 
 class LineProfilerOutputCommand(sublime_plugin.TextCommand):
-  def run(self, edit, profile_data=None):
-    if profile_data is None:
+  def run(self, edit, profile_data=None, hot_lines=None):
+    if profile_data is None or hot_lines is None:
       print('This command should only be called by line_profiler')
       return
     self.view.insert(edit,0, profile_data)
+    hot_regions = []
+    from_idx = 0
+    for line in hot_lines:
+      r = self.view.find(line, from_idx, sublime.LITERAL)
+      from_idx = r.end()
+      hot_regions.append(r)
+    self.view.add_regions('hot_lines', hot_regions,'comment','bookmark')
     self.view.set_read_only(True)
 
 
@@ -103,25 +113,18 @@ def read_output(window, p, fname):
     return
 
   # parse result
-  #  - TODO: handle multiple profiled functions
-  #  - TODO: highlight slow lines
-  file_name, func_name, profile = '<file>', '<func>', ''
-  for i,line in enumerate(output):
-    if line.startswith('File:'):
-      file_name = os.path.basename(line[6:])
-    elif line.startswith('Function:'):
-      func_name = line.split()[1]
-    elif line.startswith('====='):
-      # include header and total time
-      profile = '\n'.join(x.rstrip() for x in output[i-3:])
-      break
+  funcs = parse_output(output)
+  hot_lines = [f.hot_lines(num_stddev=1) for f in funcs]
+  hot_lines = [l for hl in hot_lines for l in hl]  # flatten hot lines
+  results = '\n\n'.join(map(str, funcs))
 
   # display
-  sublime.set_timeout(lambda: display_results(file_name, func_name, profile), 0)
+  sublime.set_timeout(lambda: display_results(results, hot_lines), 0)
 
 
-def display_results(file_name, func_name, profile):
+def display_results(results, hot_lines):
   scratch = sublime.active_window().new_file()
   scratch.set_scratch(True)
-  scratch.set_name('Profile of %s::%s' % (file_name, func_name))
-  scratch.run_command('line_profiler_output', {'profile_data': profile})
+  scratch.set_name('Profile results')
+  scratch.run_command('line_profiler_output',
+                      {'profile_data': results, 'hot_lines': hot_lines})
