@@ -4,15 +4,27 @@ This plugin exposes a simple interface to
 [line_profiler and kernprof](http://pythonhosted.org/line_profiler/)
 inside Sublime Text.
 
+## Installation
+
+LineProfiler is available via [Package Control](https://sublime.wbond.net/),
+which is the easiest way to install it.
+Alternatively, you can download this repository and place it in your `Packages` directory.
+
 ## Configuration
 
  1. Install `line_profiler` and `kernprof.py` (see the above link).
- 2. Update LineProfiler's settings:
-   1. Preferences > Package Settings > LineProfiler > "Settings - User"
-   1. Set correct paths for `python` and `kernprof`.
-   2. (Optional) Add any additional directories to `pythonpath`
-   (i.e., if you set any in `.bashrc`, set them again here).
-   Paths should be colon-separated.
+ 2. Update LineProfiler's settings (Preferences > Package Settings > LineProfiler > "Settings - User")
+
+Available preferences are:
+ 
+ * `python`: path to the Python binary you want to profile with.
+   (Try using the result of `which python` if you're not sure.)
+ * `kernprof`: path to the `kerprof.py` file you downloaded alongside the `line_profiler` module.
+ * `pythonpath`: (Optional) colon-separated list of paths that will be appended to the start of the the default PYTHONPATH.
+ * `poll_timeout_seconds`: (Optional) number of seconds to wait before killing the profiler.
+   If you're profiling code that runs for longer than a minute, increase this value. 
+ * `poll_sleep_seconds`: (Optional) number of seconds to sleep before polling the profiler for results.
+   If you find the delay in getting profiler results too long, decrease this value.
 
 ## Usage
 
