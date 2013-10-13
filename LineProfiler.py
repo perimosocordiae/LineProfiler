@@ -8,7 +8,7 @@ import tempfile
 import time
 import threading
 
-from .profiler_result import parse_output
+from profiler_result import parse_output
 
 SETTINGS = None
 
@@ -66,7 +66,10 @@ class LineProfilerCommand(sublime_plugin.TextCommand):
     window = self.view.window()
     if not is_tmpfile:
       fname = None
-    threading.Thread(target=read_output, args=(window, p, fname)).start()
+    poll_timeout = SETTINGS.get('poll_timeout_seconds', 60)
+    poll_sleep = SETTINGS.get('poll_sleep_seconds', 1)
+    threading.Thread(target=read_output,
+                     args=(window, p, fname, poll_timeout, poll_sleep)).start()
 
 
 class LineProfilerOutputCommand(sublime_plugin.TextCommand):
@@ -85,9 +88,7 @@ class LineProfilerOutputCommand(sublime_plugin.TextCommand):
     self.view.set_read_only(True)
 
 
-def read_output(window, p, fname):
-  poll_timeout = SETTINGS.get('poll_timeout_seconds', 60)
-  poll_sleep = SETTINGS.get('poll_sleep_seconds', 1)
+def read_output(window, p, fname, poll_timeout, poll_sleep):
   # poll for results
   tic = time.time()
   while p.poll() is None:

@@ -58,7 +58,7 @@ class FunctionProfile(object):
     mean_pct = self.sum_pct / len(self.lines)
     var_pct = self.sumsq_pct / len(self.lines) - mean_pct**2
     thresh = mean_pct + num_stddev * math.sqrt(var_pct)
-    print('% time threshold is', thresh)
+    print('threshold is', thresh, '% of total time')
     return [line for pct,line in self.lines if pct >= thresh]
 
   def __str__(self):
