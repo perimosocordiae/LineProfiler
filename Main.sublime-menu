@@ -40,7 +40,7 @@
                                 "command": "open_file",
                                 "args": {"file": "${packages}/User/LineProfiler.sublime-settings"},
                                 "caption": "Settings – User"
-                            },
+                            }
                         ]
                     }
                 ]
