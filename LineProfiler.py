@@ -8,6 +8,7 @@ import tempfile
 import time
 import threading
 
+sys.path.insert(0, '.')  # Hack for ST3
 from profiler_result import parse_output
 
 SETTINGS = None
