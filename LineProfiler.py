@@ -8,8 +8,10 @@ import tempfile
 import time
 import threading
 
-sys.path.insert(0, '.')  # Hack for ST3
-from profiler_result import parse_output
+if sys.version_info[0] == 2:
+  from profiler_result import parse_output
+else:
+  from .profiler_result import parse_output
 
 SETTINGS = None
 
@@ -22,7 +24,7 @@ def plugin_loaded():
   else:
     print('Error loading settings for LineProfiler')
 
-if (sys.version_info[0] == 2):
+if sys.version_info[0] == 2:
   sublime.set_timeout(plugin_loaded, 0)
 
 
