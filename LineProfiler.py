@@ -186,12 +186,17 @@ class FunctionProfile(object):
     mean_pct = self.sum_pct / len(self.lines)
     var_pct = self.sumsq_pct / len(self.lines) - mean_pct**2
     thresh = mean_pct + num_stddev * math.sqrt(var_pct)
-    print('threshold is', thresh, '% of total time')
-    return [line for pct,line in self.lines if pct >= thresh]
+    if thresh > 0:
+      print('threshold for', self.func_name, 'is', thresh, '% of total time')
+      return [line for pct,line in self.lines if pct >= thresh]
+    return []
 
   def __str__(self):
-    lines = '\n'.join(line for _,line in self.lines)
+    if self.total_time == '0 s':
+      return 'function %s in file %s was never run' % (self.func_name,
+                                                       self.file_name)
     title = 'function %s in file %s took %s' % (
         self.func_name, self.file_name, self.total_time)
+    lines = '\n'.join(line for _,line in self.lines)
     header = 'Line #      Hits         Time  Per Hit   % Time  Line Contents'
     return '\n'.join((title,'',header,'='*len(header),lines))
