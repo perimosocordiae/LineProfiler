@@ -89,17 +89,18 @@ class LineProfilerOutputCommand(sublime_plugin.TextCommand):
 
 
 def read_output(window, p, fname, poll_timeout, poll_sleep):
-  sublime.status_message('Profiling...')
+  sublime.set_timeout(lambda: sublime.status_message('Profiling...'), 0)
   # poll for results
   tic = time.time()
   while p.poll() is None:
     if time.time() - tic > poll_timeout:
-      print('kernprof timed out, killing process')
-      sublime.status_message('Profiler timed out after %d s' % poll_timeout)
+      msg = 'Profiler timed out after %f s' % (time.time() - tic)
+      print(msg)
+      sublime.set_timeout(lambda: sublime.status_message(msg), 0)
       p.kill()
       return
     time.sleep(poll_sleep)
-  sublime.status_message('Profile complete.')
+  sublime.set_timeout(lambda: sublime.status_message('Profile complete.'), 0)
 
   # read stdout and stderr
   stdout, stderr = p.communicate()
@@ -112,9 +113,10 @@ def read_output(window, p, fname, poll_timeout, poll_sleep):
 
   # check for success
   if p.returncode != 0:
-    print('kernprof exited with code %d' % p.returncode)
+    msg = 'Profile failed with code %d.' % p.returncode
+    print(msg)
     print(errors)
-    sublime.status_message('Profile failed with code %d.' % p.returncode)
+    sublime.set_timeout(lambda: sublime.status_message(msg), 0)
     return
 
   # parse result
