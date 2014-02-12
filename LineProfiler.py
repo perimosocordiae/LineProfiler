@@ -100,6 +100,7 @@ def read_output(window, p, fname, poll_timeout, poll_sleep):
       p.kill()
       return
     time.sleep(poll_sleep)
+    sublime.set_timeout(lambda: sublime.status_message('Profiling...'), 0)
   sublime.set_timeout(lambda: sublime.status_message('Profile complete.'), 0)
 
   # read stdout and stderr
