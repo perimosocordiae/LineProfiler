@@ -12,8 +12,11 @@ Alternatively, you can download this repository and place it in your `Packages` 
 
 ## Configuration
 
- 1. Install `line_profiler` and `kernprof.py` (see the above link).
- 2. Update LineProfiler's settings (Preferences > Package Settings > LineProfiler > "Settings - User")
+ 1. Install `line_profiler` and `kernprof.py`.
+     * Easiest way to install is `pip install --pre line_profiler`.
+     * Also installable by downloading from [the line_profiler website](http://pythonhosted.org/line_profiler/).
+ 2. Optional: Update LineProfiler's settings
+     * Accessible at (Preferences > Package Settings > LineProfiler > "Settings - User")
 
 Available preferences are:
  
