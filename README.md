@@ -20,9 +20,7 @@ Alternatively, you can download this repository and place it in your `Packages` 
 
 Available preferences are:
  
- * `python`: path to the Python binary you want to profile with.
-   (Try using the result of `which python` if you're not sure.)
- * `kernprof`: path to the `kerprof.py` file you downloaded alongside the `line_profiler` module.
+ * `kernprof`: (Optional) path to the `kerprof.py` file you downloaded alongside the `line_profiler` module.
  * `pythonpath`: (Optional) colon-separated list of paths that will be appended to the start of the the default PYTHONPATH.
  * `poll_timeout_seconds`: (Optional) number of seconds to wait before killing the profiler.
    If you're profiling code that runs for longer than a minute, increase this value. 

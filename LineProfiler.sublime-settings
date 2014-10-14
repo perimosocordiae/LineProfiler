@@ -1,6 +1,5 @@
 {
-	"python": "/usr/bin/python",
-	"kernprof": "kernprof.py",
+	"kernprof": "",
 	"pythonpath": "",
 	"poll_sleep_seconds": 1,
 	"poll_timeout_seconds": 60

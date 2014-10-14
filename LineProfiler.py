@@ -15,7 +15,7 @@ SETTINGS = None
 def plugin_loaded():
   global SETTINGS
   SETTINGS = sublime.load_settings('LineProfiler.sublime-settings')
-  if SETTINGS and SETTINGS.get('python') is not None:
+  if SETTINGS and SETTINGS.get('kernprof') is not None:
     print('Loaded settings for LineProfiler')
   else:
     print('Error loading settings for LineProfiler')
@@ -41,11 +41,11 @@ class LineProfilerCommand(sublime_plugin.TextCommand):
     env = os.environ.copy()
     pythonpath = SETTINGS.get('pythonpath','')
     if fname is None:
-      env['PYTHONPATH'] = pythonpath
+      env['PYTHONPATH'] = pythonpath.encode('UTF-8')
       cwd = None
     else:
       cwd = os.path.dirname(fname)
-      env['PYTHONPATH'] = cwd + os.pathsep + pythonpath
+      env['PYTHONPATH'] = (cwd + os.pathsep + pythonpath).encode('UTF-8')
 
     # write the file if it's not saved right now
     if fname is None or self.view.is_dirty():
@@ -56,9 +56,10 @@ class LineProfilerCommand(sublime_plugin.TextCommand):
       is_tmpfile = True
 
     # run kernprof with the correct paths
-    python = SETTINGS.get('python','python')
-    kernprof = SETTINGS.get('kernprof','kernprof.py')
-    p = subprocess.Popen([python,kernprof,'-lbv','-o','/dev/null',fname],
+    kernprof = SETTINGS.get('kernprof', '')
+    if not kernprof:
+      kernprof = which('kernprof')
+    p = subprocess.Popen([kernprof,'-lbv','-o',os.devnull,fname],
                          env=env, cwd=cwd, stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE)
 
@@ -70,6 +71,16 @@ class LineProfilerCommand(sublime_plugin.TextCommand):
     poll_sleep = SETTINGS.get('poll_sleep_seconds', 1)
     threading.Thread(target=read_output,
                      args=(window, p, fname, poll_timeout, poll_sleep)).start()
+
+
+def which(progname):
+  exts = os.environ.get('PATHEXT', '').split(os.pathsep)
+  for path in os.environ['PATH'].split(os.pathsep):
+    for ext in exts:
+      fullpath = os.path.join(path, progname + ext)
+      if os.path.exists(fullpath):
+        return fullpath
+  return None
 
 
 class LineProfilerOutputCommand(sublime_plugin.TextCommand):

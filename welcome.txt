@@ -22,11 +22,8 @@ If needed, update LineProfiler's settings.
 
 Available preferences are:
  
- * `python`: path to the Python binary you want to profile with.
-   (Try using the result of `which python` if you're not sure.)
-
- * `kernprof`: path to `kerprof.py` (comes with the `line_profiler` module)
-   (Try `which kernprof.py` if you're not sure.)
+ * `kernprof`: (Optional) path to `kerprof.py`
+   (If left blank, LineProfiler will attempt to find it for you.)
 
  * `pythonpath`: (Optional) colon-separated list of paths to prepend to the default PYTHONPATH.
 
