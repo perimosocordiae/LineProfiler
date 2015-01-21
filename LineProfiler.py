@@ -59,6 +59,11 @@ class LineProfilerCommand(sublime_plugin.TextCommand):
     kernprof = SETTINGS.get('kernprof', '')
     if not kernprof:
       kernprof = which('kernprof')
+    if not kernprof:
+      msg = "LineProfiler failed: couldn't find kernprof executable."
+      print(msg)
+      sublime.set_timeout(lambda: sublime.status_message(msg), 0)
+      return
     p = subprocess.Popen([kernprof,'-lbv','-o',os.devnull,fname],
                          env=env, cwd=cwd, stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE)
