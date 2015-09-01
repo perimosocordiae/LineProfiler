@@ -119,20 +119,23 @@ def read_output(window, p, fname, poll_timeout, poll_sleep):
   sublime.set_timeout(lambda: sublime.status_message('Profiling...'), 0)
   # poll for results
   tic = time.time()
-  while p.poll() is None:
-    if time.time() - tic > poll_timeout:
-      p.kill()
-      msg = 'Profiler timed out after %.1f s' % (time.time() - tic)
-      print(msg)
-      sublime.set_timeout(lambda: sublime.status_message(msg), 0)
-      sublime.set_timeout(lambda: display_results(msg, []), 0)
-      return
-    time.sleep(poll_sleep)
-    sublime.set_timeout(lambda: sublime.status_message('Profiling...'), 0)
-  sublime.set_timeout(lambda: sublime.status_message('Profile complete.'), 0)
+  while True:
+    try:
+      stdout, stderr = p.communicate(timeout=poll_sleep)
+    except subprocess.TimeoutExpired:
+      if time.time() - tic > poll_timeout:
+        p.kill()
+        msg = 'Profiler timed out after %.1f s' % (time.time() - tic)
+        print(msg)
+        sublime.set_timeout(lambda: sublime.status_message(msg), 0)
+        sublime.set_timeout(lambda: display_results(msg, []), 0)
+        return
+      sublime.set_timeout(lambda: sublime.status_message('Profiling...'), 0)
+    else:
+      break
 
-  # read stdout and stderr
-  stdout, stderr = p.communicate()
+  # Profiling finished before the timeout.
+  sublime.set_timeout(lambda: sublime.status_message('Profile complete.'), 0)
   errors = stderr.decode('UTF-8')
   output = stdout.decode('UTF-8').splitlines()
 
