@@ -72,9 +72,12 @@ class LineProfilerCommand(sublime_plugin.TextCommand):
       print(msg)
       sublime.set_timeout(lambda: sublime.status_message(msg), 0)
       return
+
+    print('Running kernprof on', fname)
+    NO_WINDOW = 0x08000000
     p = subprocess.Popen([kernprof,'-lbv','-o',os.devnull,fname],
                          env=env, cwd=cwd, stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE)
+                         stderr=subprocess.PIPE, creationflags=NO_WINDOW)
 
     # set up the output catcher thread
     window = self.view.window()
