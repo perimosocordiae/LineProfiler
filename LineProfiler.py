@@ -39,13 +39,21 @@ class LineProfilerCommand(sublime_plugin.TextCommand):
     fname = self.view.file_name()
     is_tmpfile = False
     env = os.environ.copy()
+
+    # hacky handling of various str/bytes/unicode issues
     pythonpath = SETTINGS.get('pythonpath','')
+    if not isinstance(pythonpath, str):
+      if hasattr(pythonpath, 'encode'):
+        pythonpath = pythonpath.encode('utf-8')
+      else:
+        pythonpath = pythonpath.decode('utf-8')
+
     if fname is None:
-      env['PYTHONPATH'] = pythonpath.encode('UTF-8')
+      env['PYTHONPATH'] = pythonpath
       cwd = None
     else:
       cwd = os.path.dirname(fname)
-      env['PYTHONPATH'] = (cwd + os.pathsep + pythonpath).encode('UTF-8')
+      env['PYTHONPATH'] = cwd + os.pathsep + pythonpath
 
     # write the file if it's not saved right now
     if fname is None or self.view.is_dirty():
