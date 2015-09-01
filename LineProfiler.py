@@ -225,7 +225,8 @@ class FunctionProfile(object):
     var_pct = self.sumsq_pct / len(self.lines) - mean_pct**2
     thresh = mean_pct + num_stddev * math.sqrt(var_pct)
     if thresh > 0:
-      print('threshold for', self.func_name, 'is', thresh, '% of total time')
+      print('threshold for %s is %.2f%% of total time' % (self.func_name,
+                                                          thresh))
       return [line for pct,line in self.lines if pct >= thresh]
     return []
 
