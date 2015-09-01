@@ -121,10 +121,11 @@ def read_output(window, p, fname, poll_timeout, poll_sleep):
   tic = time.time()
   while p.poll() is None:
     if time.time() - tic > poll_timeout:
-      msg = 'Profiler timed out after %f s' % (time.time() - tic)
+      p.kill()
+      msg = 'Profiler timed out after %.1f s' % (time.time() - tic)
       print(msg)
       sublime.set_timeout(lambda: sublime.status_message(msg), 0)
-      p.kill()
+      sublime.set_timeout(lambda: display_results(msg, []), 0)
       return
     time.sleep(poll_sleep)
     sublime.set_timeout(lambda: sublime.status_message('Profiling...'), 0)
