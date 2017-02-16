@@ -1,6 +1,7 @@
 from __future__ import print_function
 import math
 import os
+import platform
 import sublime
 import sublime_plugin
 import subprocess
@@ -74,10 +75,12 @@ class LineProfilerCommand(sublime_plugin.TextCommand):
       return
 
     print('Running kernprof on', fname)
-    NO_WINDOW = 0x08000000
-    p = subprocess.Popen([kernprof,'-lbv','-o',os.devnull,fname],
-                         env=env, cwd=cwd, stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE, creationflags=NO_WINDOW)
+    popen_kwargs = dict(env=env, cwd=cwd, stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE)
+    if platform.system() == 'Windows':
+      popen_kwargs['creationflags'] = 0x08000000  # NO_WINDOW
+    p = subprocess.Popen([kernprof, '-lbv', '-o', os.devnull, fname],
+                         **popen_kwargs)
 
     # set up the output catcher thread
     window = self.view.window()
