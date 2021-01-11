@@ -200,7 +200,7 @@ def parse_output(lines):
       hits, time, per_hit, percent = 0,0,0,0
       if len(vals) > 1:
         hits, time, per_hit, percent = vals[1:]
-      curr_func.add_line(int(line_num), int(hits), int(time),
+      curr_func.add_line(int(line_num), int(hits), float(time),
                          float(per_hit), float(percent), line.rstrip())
   return funcs
 
